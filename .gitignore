@@ -1,0 +1,52 @@
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Misc
+tmp
+tmp.py
+
+# virtualenv
+venv
+.env
+
+# Logs
+pip-log.txt
+log.txt
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Phonegap
+.cordova
