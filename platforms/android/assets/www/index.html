@@ -20,10 +20,6 @@
 
   <script type="text/javascript">
 
-  // $.cookie('cookiename', 'cookievalue',
-  //   { path: '/', domain: '.elbanking.com'} // any subdomain on any path
-  // );
-
   $(function() {
 
     $(document).ready(function () {
@@ -31,15 +27,23 @@
         $('.login-form').on('click', '#get-button', get_test);
     });
 
+    var milliseconds = 0;
+    var logURL = "";
+
     function login() {
       $.ajax({
           type: "POST",
           //url: "httpS://
-          url: "http://www.elbanking.com/print_request.php",
+          url: "https://simplisafe.com/my-account/login",
           //url: "print_request.php",
           cache: false,
           //crossDomain: true,
-          data: {user: $('#user-field').val(), password: $('#password-field').val()},
+          data: {
+            name: $('#user-field').val(), 
+            pass: $('#password-field').val(),
+            form_id: 'user_login',
+            op: 'Log in',
+          },
           //dataType: 'json', // will return error if response is not JSON
           // xhrFields: {
           //   withCredentials: true
@@ -53,6 +57,13 @@
           }
           $('#text-output').empty();
           $('#text-output').text("<p>" + data + "</p>");
+
+          milliseconds = (new Date).getTime();
+          if (data.d) { data = data.d }
+          alert(data);
+          var $r = $(data);
+          logURL = $r.filter("link[rel='canonical']").attr('href') + '/utility/tables?_=' + milliseconds + '&&table=event-log-table';
+          alert(logURL);
         })
         .fail(function( e ) {
           alert( "Error " + e.responseStatus + ": " + e.responseText );
@@ -60,19 +71,27 @@
     }
 
     function get_test() {
+      alert(logURL);
       $.ajax({
           type: "GET",
-          url: "http://www.elbanking.com/print_request.php?test=1",
-          //url: "print_request.php?test=1",
+          //url: "http://www.elbanking.com/print_request.php?test=1",
+          url: logURL,
           cache: false,
           //crossDomain: true,
       })
         .done(function( data ) {
           //alert( "success" );
-          alert(data.slice( 0, 100 ));
-          if ( console && console.log ) {
-            console.log( "returned GET:", data );
-          }
+          // alert(data.slice( 0, 100 ));
+          // if ( console && console.log ) {
+          //   console.log( "returned GET:", data );
+          // }
+          // create jQuery object from the response HTML
+          if (data.d) { data = data.d }
+          alert(data);
+          var $response = $(data);
+
+          var table = $response.filter('table').html();
+          alert(table);
         })
         .fail(function( e ) {
           alert( "Error " + e.responseStatus + ": " + e.responseText );
