@@ -1,26 +1,40 @@
 $(function() {
+
+    var logURL = "";
+    var loggedIn = false;
+
+    // customize BlockUI blocking screen
+    $.blockUI.defaults.message = '<h3>Please wait...</h3>';
+    $.blockUI.defaults.overlayCSS.opacity = 0.7;
+    $.blockUI.defaults.css = {}; // use our CSS file instead
+
+    // block while ajax is happening
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+
     $(document).ready(function () {
         $('#button-submit').on('click', function(e) {
-          e.preventDefault();
-
-          login();
-          //get_events();
-
-          $('#html5-block').html("<table border='1'><tr><td>row 1, cell 1</td><td>row 1, cell 2</td></tr><tr><td>row 2, cell 1</td><td>row 2, cell 2</td></tr></table>");
+          
+          loginAndGet();
           location.href = "#page-events";
+
         });
-        //$('.login-form').on('click', '#get-button', get_test);
+
+        $('#button-refresh').on('click', function(e) {
+
+          if (!loggedIn) {
+            console.log("main(): not logged in when it should be!");
+            loginAndGet();
+          }
+          getEvents();
+
+        });
     });
 
-    var milliseconds = 0;
-    var logURL = "";
-
-    function login() {
+    function loginAndGet() {
       $.ajax({
           type: "POST",
           url: "https://simplisafe.com/my-account/login",
           cache: false,
-          //crossDomain: true, // don't need it for PhoneGap apps
           data: {
             name: $('#text-email').val(), 
             pass: $('#text-pass').val(),
@@ -29,49 +43,41 @@ $(function() {
           },
       })
         .done(function( data ) {
-          //alert( "success" );
-          alert(data.slice( 0, 100 ));
-          if ( console && console.log ) {
-            console.log( "returned POST:", data );
-          }
-          $('#text-output').empty();
-          $('#text-output').text("<p>" + data + "</p>");
 
-          milliseconds = (new Date).getTime();
-          if (data.d) { data = data.d }
-          alert(data);
+          var milliseconds = (new Date).getTime();
           var $r = $(data);
           logURL = $r.filter("link[rel='canonical']").attr('href') + '/utility/tables?_=' + milliseconds + '&&table=event-log-table';
-          alert(logURL);
+          console.log("login(): loggedIn = true");
+          loggedIn = true;
+
+          // call it here to prevent it from beng fired before we are logged in
+          getEvents();
         })
         .fail(function( e ) {
-          alert( "Error " + e.responseStatus + ": " + e.responseText );
+          console.log( "Error " + e.responseStatus + ": " + e.responseText );
         });
     }
 
-    function get_test() {
-      alert(logURL);
+    function getEvents() {
       $.ajax({
           type: "GET",
           url: logURL,
           cache: false,
       })
         .done(function( data ) {
-          //alert( "success" );
-          // alert(data.slice( 0, 100 ));
-          // if ( console && console.log ) {
-          //   console.log( "returned GET:", data );
-          // }
-          // create jQuery object from the response HTML
-          if (data.d) { data = data.d }
-          alert(data);
-          var $response = $(data);
 
+          var $response = $(data);
           var table = $response.filter('table').html();
-          alert(table);
+          $('#html5-block').html( "<table>" + table + "</table>" );
+          $('#html5-block a').remove();
+          $('#html5-block tr').removeClass();
+
+          // bootstrap3 table styling
+          $('#html5-block table').attr('class', 'table table-bordered table-condensed table-striped');
+          console.log("getEvents(): table reloaded");
         })
         .fail(function( e ) {
-          alert( "Error " + e.responseStatus + ": " + e.responseText );
+          console.log( "Error " + e.responseStatus + ": " + e.responseText );
         });
     }
 });
