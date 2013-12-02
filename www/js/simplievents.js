@@ -12,22 +12,31 @@ $(function() {
     $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
 
     $(document).ready(function () {
-        $('#button-submit').on('click', function(e) {
-          
+
+      console.log('main(): loggedIn = ' + loggedIn);
+      console.log('main(): cookies = ' + document.cookies);
+      if (loggedIn) {
+        console.log('main(): already logged in, just refresh');
+        getEvents();
+        location.href = "#page-events";
+      }
+
+      $('#button-submit').on('click', function(e) {
+        
+        loginAndGet();
+        location.href = "#page-events";
+
+      });
+
+      $('#button-refresh').on('click', function(e) {
+
+        if (!loggedIn) {
+          console.log("main(): not logged in when it should be!");
           loginAndGet();
-          location.href = "#page-events";
+        }
+        getEvents();
 
-        });
-
-        $('#button-refresh').on('click', function(e) {
-
-          if (!loggedIn) {
-            console.log("main(): not logged in when it should be!");
-            loginAndGet();
-          }
-          getEvents();
-
-        });
+      });
     });
 
     function loginAndGet() {
