@@ -7,8 +7,7 @@ div.blockMsg {
 	border:           none;
 	padding:          15px;
 	background-color: #000;
-	'-webkit-border-radius': 10px;
-	'-moz-border-radius':    10px;
+	-webkit-border-radius: 10px;
 	opacity:          .8;
 	color:            #fff;
 	width:            60%;

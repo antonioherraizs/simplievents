@@ -1,7 +1,6 @@
 $(function() {
 
     var logURL = "";
-    var loggedIn = false;
 
     // customize BlockUI blocking screen
     $.blockUI.defaults.message = '<h3>Please wait...</h3>';
@@ -13,34 +12,32 @@ $(function() {
 
     $(document).ready(function () {
 
-      console.log('main(): loggedIn = ' + loggedIn);
-      console.log('main(): cookies = ' + document.cookies);
-
-      // If value was stored, maybe cookies are still valid?
-      if (loggedIn) {
-        console.log('main(): already logged in, just refresh');
+      /* Any time the app loads (from scratch, resuming, background, whatever):
+       * 1. Try to retrieve logURL from LocalStorage
+       * 2. Fire AJAX call to update events list with logURL
+       * 
+       * Possible outcomes:
+       * 1. logURL is good and we're logged in ==> get updated table
+       * 2. logURL old or not logged in ==> sent to login screen
+       */
+      console.log("main(): trying to get logURL from LocalStorage");
+      var value = window.localStorage.getItem("logURL");
+      if (value !== null && value !== "") {
+        console.log("main() got logURL = " + value);
+        logURL = value;
         getEvents();
-        location.href = "#page-events";
       }
 
       $('#button-submit').on('click', function(e) {
-        
         loginAndGet();
-
       });
 
       $('#button-refresh').on('click', function(e) {
-
-        if (!loggedIn) {
-          console.log("main(): not logged in when it should be!");
-          loginAndGet();
-        }
         getEvents();
-
       });
     });
 
-    function gotLoginPage( jquery_page ) {
+    function amILoggedIn( jquery_page ) {
       return jquery_page.filter("title").text().substr(0,6) == "Log in";
     }
 
@@ -60,16 +57,16 @@ $(function() {
 
           var $response = $(data);
 
-          if ( gotLoginPage($response) ) {
+          if ( amILoggedIn($response) ) {
             // user/pass wrong
             console.log("loginAndGet(): user/pass wrong!");
-            loggedIn = false;
           } else {
             var milliseconds = (new Date).getTime();
             logURL = $response.filter("link[rel='canonical']").attr('href')
               + '/utility/tables?_=' + milliseconds + '&&table=event-log-table';
-            console.log("login(): loggedIn = true");
-            loggedIn = true;
+
+            window.localStorage.setItem("logURL", logURL);
+            console.log("login(): logged in and URL stored");
 
             // call it here to prevent it from beng fired before we are logged in
             getEvents();
@@ -90,11 +87,10 @@ $(function() {
 
           var $response = $(data);
 
-          if ( gotLoginPage($response) ) {
+          if ( amILoggedIn($response) ) {
             // send to login page, with a message
             location.href = "#page-login";
-            console.log("getEvents(): not logged in! changed pass?");
-            loggedIn = false;
+            console.log("getEvents(): not logged in!");
           } else {
             var table = $response.filter('table').html();
             $('#html5-block').empty();
