@@ -95,15 +95,26 @@ $(function() {
             var table = $response.filter('table').html();
             $('#html5-block').empty();
             $('#html5-block').html( "<table>" + table + "</table>" );
+
+            // remove unnecessary elements
             $('#html5-block a').remove();
             $('#html5-block tr').removeClass();
+
+            // remove word 'System ' from table rows
+            $('#html5-block table td:contains("System ")').each(function(){
+              $(this).text( $(this).text().replace(/System /g, '') );
+            });
 
             // bootstrap3 table styling
             $('#html5-block table')
               .attr('class', 'table table-bordered table-condensed table-striped');
-            console.log("getEvents(): table reloaded");
+
+            // My own styling
+            $('table tr td:nth-child(1)').css("font-size", "smaller"); // Date column
+            $('table tr td:nth-child(2)').css("font-size", "smaller"); // Time column
 
             // and go to see the log, in case we're not there
+            console.log("getEvents(): table reloaded");
             location.href = "#page-events";
           }
         })
