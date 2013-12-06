@@ -15,3 +15,14 @@ div.blockMsg {
 	left:             20%;
 	text-align:       center;
 }
+
+.date-picker-label {
+	text-align: right;
+	padding-top: 0.4em;
+	padding-right: 0.2em;
+}
+
+.menu-label {
+	text-align: center;
+	padding-top: 0.4em;
+}

@@ -10,6 +10,10 @@ $(function() {
     // block while ajax is happening
     $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
 
+    // Setup some defaults for date pickers; placeholder= and value= didn't work
+    $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
+    $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
+
     $(document).ready(function () {
 
       /* Any time the app loads (from scratch, resuming, background, whatever):
@@ -26,6 +30,7 @@ $(function() {
         console.log("main() got logURL = " + value);
         logURL = value;
         getEvents();
+        //location.href = '#page-events';
       }
 
       $('#button-submit').on('click', function(e) {

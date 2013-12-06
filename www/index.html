@@ -17,6 +17,7 @@
   <script src="js/codiqa.ext.min.js"></script>
   <script src="js/simplievents.js"></script>
   <script src="js/jquery.blockUI.js"></script>
+  <script src="js/moment.min.js"></script>
   <!--<script src="cordova.js"></script> only when I start using the PhoneGap API -->
 
 </head>
@@ -57,7 +58,52 @@
               Event Log
           </h3>
       </div>
-      <div data-role="content">
+        <div data-role="content">
+          <div class="ui-grid-b">
+              <div class="ui-block-a">
+                <div data-controltype="textblock">
+                  <p class="menu-label"><b>
+                      Filter by type or date range
+                  </b></p>
+                </div>
+              </div>
+              <div class="ui-block-b">
+                <div data-controltype="textblock">
+                  <p class="date-picker-label"><b>
+                      From
+                  </b></p>
+                </div>
+              </div>
+              <div class="ui-block-c">
+                  <div data-role="fieldcontain" data-controltype="dateinput">
+                      <input name="" id="dateinput_from" type="date">
+                  </div>
+              </div>
+              <div class="ui-block-a">
+                <div data-role="fieldcontain" data-controltype="selectmenu">
+                    <select id="selectmenu" name="">
+                        <option value="option1">
+                            All
+                        </option>
+                        <option value="value">
+                            Disarm
+                        </option>
+                    </select>
+                </div>
+              </div>
+              <div class="ui-block-b">
+                <div data-controltype="textblock">
+                  <p class="date-picker-label"><b>
+                      To
+                  </b></p>
+                </div>
+              </div>
+              <div class="ui-block-c">
+                  <div data-role="fieldcontain" data-controltype="dateinput">
+                      <input name="" id="dateinput_to" type="date">
+                  </div>
+              </div>
+          </div>
           <div id="html5-block" data-controltype="htmlblock" class="table-responsive">
           </div>
       </div>
