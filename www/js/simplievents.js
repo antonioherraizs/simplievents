@@ -1,6 +1,16 @@
 $(function() {
 
+    // URL to get data once logged in. Will keep in LocalStorage
     var logURL = "";
+
+    /* The list of events.
+     * 
+     * Considered a LinkedList but we don't worry about add/remove
+     * in the middle of the list so an Array will do fine for now.
+     * We don't need it to be an associative array, so use Array()
+     * not Object() to initialize it.
+     */
+    var eventList = Array();
 
     // Customize BlockUI blocking screen
     $.blockUI.defaults.message = '<h3>Please wait...</h3>';
@@ -33,16 +43,23 @@ $(function() {
         //location.href = '#page-events';
       }
 
+      // Actions on events for all pages
       $('#button-submit').on('click', function() {
         loginAndGet();
       });
-
       $('#button-refresh').on('click', function() {
         getEvents();
       });
+      $("#selectmenu").on('change', function() {
+        buildEventList( $("#selectmenu").val() ); // apply filters
+      });
+      $('#button-apply-filters').on('click', function() {
+        location.href = '#page-events'; // filters are already set
+      });
+
     });
 
-    function amILoggedIn( $jquery_page ) {
+    function needToLogin( $jquery_page ) {
       return $jquery_page.filter("title").text().substr(0,6) == "Log in";
     }
 
@@ -60,9 +77,9 @@ $(function() {
       })
         .done(function( data ) {
 
-          var $response = $(data);
+          var $response = $(data); // make jQuery object
 
-          if ( amILoggedIn($response) ) {
+          if ( needToLogin($response) ) {
             // user/pass wrong
             console.log("loginAndGet(): user/pass wrong!");
           } else {
@@ -73,7 +90,8 @@ $(function() {
             window.localStorage.setItem("logURL", logURL);
             console.log("login(): logged in and URL stored");
 
-            // call it here to prevent it from beng fired before we are logged in
+            // Call it here to prevent it from beng fired before we are logged in
+            // I could probably use some onAjaxFired event thing
             getEvents();
           }
         })
@@ -82,28 +100,71 @@ $(function() {
         });
     }
 
-    function convertTableToList( $jQueryTable ) {
-      /* Considered a LinkedList but we don't worry about add/remove
-       * in the middle of the list so an Array will do fine for now.
-       * We don't need it to be an associative array, so use Array()
-       * not Objecct() to initialize it.
-       */
-      var list = Array();
+    /*************************
+     ******** EVENTS *********
+     *************************/
 
-      // make a proper jQuery object so I can use find() ???
-      //$table = $($.parseHTML( $jQueryTable.html() ));
+    function getEventType( eventText ) {
       
+      var ret = "unknown";
+      var eventTypes = Object();
+
+      // build an associative array of the type
+      // { 'Armed' : 'armed', 'Error' : 'error' }
+      // from the <select> in index.html
+      $('#selectmenu option').each( function() {
+        if ( $(this).text() !== 'All' )
+          eventTypes[ $(this).text() ] = $(this).val();
+      });
+
+      // find out which one eventText contains
+      for (var e in eventTypes) {
+        if (eventText.indexOf(e) !== -1)
+          ret = eventTypes[e];
+      }
+
+      return ret;
+    }
+
+    function convertTableToList( $jQueryTable ) {
+
+      // jQuery filter() – search through all the elements.
+      // jQuery find() – search through all the child elements only.
       // for each row, get [date, time, event] and store in Array
+      // this performs in cuadratic time
+      eventList = []; // empty it first
       $jQueryTable.find('tr[class]').each( function() {
-        list.push({
+        eventList.push({
           'date' : this.cells[0].innerText,
           'time' : this.cells[1].innerText,
           'event' : this.cells[2].innerText,
+          'type' : getEventType(this.cells[2].innerText),
         });
       });
 
-      console.log("convert(): " + list);
-      return list;
+      console.log("convertTableToList(): eventList.length = " + eventList.length);;
+    }
+
+    function buildEventList( typeFilter ) {
+      
+      $("#event-list").empty();
+      
+      for(var i = 0; i < eventList.length; i++) {
+        if (eventList[i]['type'] === typeFilter || typeFilter === 'all') {
+          $("#event-list").append(
+            '<li>' + '<h3>' 
+            + eventList[i]['date'] + ' @' 
+            + eventList[i]['time'] + '</h3>' 
+            + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
+          );
+        }
+      }
+      // Apply jQuery Mobile's CSS rendering, since DOM has already been built
+      // http://stackoverflow.com/a/13694211/251509
+      // Also, refresh it only if it's ready, to avoid initialization error:
+      // http://stackoverflow.com/q/10373618/251509
+      if ( $('#event-list').hasClass('ui-listview') )
+        $('#event-list').listview('refresh');
     }
 
     function getEvents() {
@@ -116,34 +177,21 @@ $(function() {
 
           var $response = $(data);
 
-          if ( amILoggedIn($response) ) {
+          if ( needToLogin($response) ) {
             // send to login page, with a message
             location.href = "#page-login";
             console.log("getEvents(): not logged in!");
           } else {
             var $table = $('<table>'
               + $response.filter('table').html() + '</table>');
-            var list = convertTableToList($table);
+            // from <table> to Array()
+            convertTableToList($table);
 
-            // build event list
-            $("#event-list").empty();
-            for(var i = 0; i < list.length; i++) {
-              $("#event-list").append(
-                '<li>' +
-                '<h3>' + list[i]['date'] + ' @' + list[i]['time'] + '</h3>' +
-                '<p>' + list[i]['event'] + '</p>' +
-                '</li>'
-              );
-            }
-            // Apply jQuery Mobile's CSS rendering, since DOM has already been built
-            // http://stackoverflow.com/a/13694211/251509
-            // Also, refresh it only if it's ready, to avoid initialization error:
-            // http://stackoverflow.com/q/10373618/251509
-            if ( $('#event-list').hasClass('ui-listview') )
-              $('#event-list').listview('refresh');
+            // build and refresh event list as ListView
+            buildEventList('all');
 
-            // and go to see the log, in case we're not there
-            console.log("getEvents(): table reloaded");
+            // and go to see the list, in case we're not there
+            console.log("getEvents(): table loaded");
             location.href = "#page-events";
           }
         })
