@@ -10,7 +10,6 @@
   <link href="css/codiqa.ext.min.css" rel="stylesheet">
   <link href="css/jquery.mobile-1.3.1.min.css" rel="stylesheet">
   <link href="css/simplievents.css" rel="stylesheet">
-  <link href="css/bootstrap-tables.css" rel="stylesheet">
 
   <script src="js/jquery-1.9.1.min.js"></script>
   <script src="js/jquery.mobile-1.3.1.min.js"></script>
@@ -18,7 +17,7 @@
   <script src="js/simplievents.js"></script>
   <script src="js/jquery.blockUI.js"></script>
   <script src="js/moment.min.js"></script>
-  <!--<script src="cordova.js"></script> only when I start using the PhoneGap API -->
+  <!--<script src="cordova.js"></script> only when we need the PhoneGap API -->
 
 </head>
 <body>
@@ -47,7 +46,8 @@
             </a>
         </form>
     </div>
-</div>
+  </div>
+  
   <div data-role="page" data-control-title="Events" id="page-events">
       <div data-theme="b" data-role="header">
           <a id="button-refresh" data-role="button" data-theme="a" href="#" 
@@ -58,53 +58,56 @@
               Event Log
           </h3>
       </div>
-        <div data-role="content">
-          <div class="ui-grid-b">
-              <div class="ui-block-a">
-                <div data-controltype="textblock">
-                  <p class="menu-label"><b>
-                      Filter by type or date range
-                  </b></p>
-                </div>
-              </div>
-              <div class="ui-block-b">
-                <div data-controltype="textblock">
-                  <p class="date-picker-label"><b>
-                      From
-                  </b></p>
-                </div>
-              </div>
-              <div class="ui-block-c">
-                  <div data-role="fieldcontain" data-controltype="dateinput">
-                      <input name="" id="dateinput_from" type="date">
-                  </div>
-              </div>
-              <div class="ui-block-a">
-                <div data-role="fieldcontain" data-controltype="selectmenu">
-                    <select id="selectmenu" name="">
-                        <option value="option1">
-                            All
-                        </option>
-                        <option value="value">
-                            Disarm
-                        </option>
-                    </select>
-                </div>
-              </div>
-              <div class="ui-block-b">
-                <div data-controltype="textblock">
-                  <p class="date-picker-label"><b>
-                      To
-                  </b></p>
-                </div>
-              </div>
-              <div class="ui-block-c">
-                  <div data-role="fieldcontain" data-controltype="dateinput">
-                      <input name="" id="dateinput_to" type="date">
-                  </div>
-              </div>
+      <div data-role="content">
+        <a data-role="button" data-theme="b" href="#page-filters"
+        data-transition="fade" data-rel="dialog" class="no-border">
+            Apply Filters
+        </a>
+        <hr style="height:1px; background-color:#fff; opacity:0; border:0; margin-top:12px; margin-bottom:12px;">
+        <ul id="event-list" data-role="listview" data-inset="false" class="event-list">
+          <!-- empty, built by JS -->
+        </ul>
+      </div>
+  </div>
+
+  <div data-role="page" data-control-title="Filters" id="page-filters">
+      <div data-theme="b" data-role="header">
+          <h2>
+              Apply Filters
+          </h2>
+      </div>
+      <div data-role="content">
+          <div data-role="fieldcontain" data-controltype="selectmenu" class="no-border">
+              <label for="selectmenu">
+                  Choose a type
+              </label>
+              <select id="selectmenu" name="">
+                  <option value="all">
+                      All
+                  </option>
+                  <option value="armed">
+                      Armed
+                  </option>
+                  <option value="disarmed">
+                      Disarmed
+                  </option>
+              </select>
           </div>
-          <div id="html5-block" data-controltype="htmlblock" class="table-responsive">
+          <div data-role="fieldcontain" data-controltype="dateinput" class="no-border">
+              <label for="dateinput_from">
+                  From date
+              </label>
+              <input name="" id="dateinput_from" placeholder="" value="" type="date">
+          </div>
+          <div data-role="fieldcontain" data-controltype="dateinput" class="no-border">
+              <label for="dateinput_to">
+                  To date
+              </label>
+              <input name="" id="dateinput_to" placeholder="" value="" type="date">
+          </div>
+          <div class="centered">
+            <a href="#page-events" data-role="button" data-theme="a" data-inline="true">Cancel</a>
+            <button id="button-apply-filters" data-theme="b" data-inline="true">Apply</button>
           </div>
       </div>
   </div>
