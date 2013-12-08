@@ -1,6 +1,8 @@
 $(function() {
 
-    // URL to get data once logged in. Will keep in LocalStorage
+    /* URL to get data once logged in.
+     * Will keep in LocalStorage.
+     */ 
     var logURL = "";
 
     /* The list of events.
@@ -11,6 +13,11 @@ $(function() {
      * not Object() to initialize it.
      */
     var eventList = Array();
+
+    /* Filter for event type.
+     * Make it available to multiple functions.
+     */ 
+    var typeFilter = "all";
 
     // Customize BlockUI blocking screen
     $.blockUI.defaults.message = '<h3>Please wait...</h3>';
@@ -54,7 +61,8 @@ $(function() {
         getEvents();
       });
       $("#selectmenu").on('change', function() {
-        buildEventList( $("#selectmenu").val() ); // apply filters
+        typeFilter = $("#selectmenu").val();
+        buildEventList(typeFilter); // apply filters
       });
       $('#button-apply-filters').on('click', function() {
         location.href = '#page-events'; // filters are already set
@@ -196,7 +204,7 @@ $(function() {
             convertTableToList($table);
 
             // build and refresh event list as ListView
-            buildEventList('all');
+            buildEventList(typeFilter);
 
             // and go to see the list, in case we're not there
             console.log("getEvents(): table loaded");
