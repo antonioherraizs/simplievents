@@ -15,7 +15,10 @@ $(function() {
     // Customize BlockUI blocking screen
     $.blockUI.defaults.message = '<h3>Please wait...</h3>';
     $.blockUI.defaults.overlayCSS.opacity = 0.7;
-    $.blockUI.defaults.css = {}; // use our CSS file instead
+    $.blockUI.defaults.css.border = 'none';
+    $.blockUI.defaults.css.backgroundColor = '#000';
+    $.blockUI.defaults.css.color = '#fff';
+    $.blockUI.defaults.css.borderRadius = '10px';
 
     // Setup BlockUI: block while ajax is happening
     $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
@@ -159,6 +162,11 @@ $(function() {
           );
         }
       }
+
+      if ( typeFilter !== 'all' && $("#event-list li").length == 0 ) {
+        $("#event-list").append('<h3>Nothing here :( try with another type</h3>');
+      }
+
       // Apply jQuery Mobile's CSS rendering, since DOM has already been built
       // http://stackoverflow.com/a/13694211/251509
       // Also, refresh it only if it's ready, to avoid initialization error:

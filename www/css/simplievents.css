@@ -9,17 +9,3 @@
 ul.event-list p {
 	font-size: medium;
 }
-
-/* jQuery BlockUI plugin CSS */
-div.blockMsg {
-	border:           none;
-	padding:          15px;
-	background-color: #000;
-	-webkit-border-radius: 10px;
-	opacity:          .8;
-	color:            #fff;
-	width:            60%;
-	top:              40%;
-	left:             20%;
-	text-align:       center;
-}
