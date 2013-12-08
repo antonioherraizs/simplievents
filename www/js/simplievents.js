@@ -167,7 +167,7 @@ $(function() {
     }
 
     function buildEventList( eventFilter ) {
-      
+
       /* Build the list of events with the filter passed as a parameter.
        *
        * The filter can be for event types or a date range.
@@ -185,16 +185,17 @@ $(function() {
       
       for(var i = 0; i < eventList.length; i++) {
         if (eventList[i]['type'] == eventFilter['type'] || eventFilter['type'] == 'all') {
-          if (useDateFilter && 
-            moment(eventFilter['dateFrom']).unix() 
-            <= moment(eventList[i]['date']).unix()
-            <= moment(eventFilter['dateTo']).unix() ) {
-              $("#event-list").append(
-                '<li>' + '<h3>'
-                + eventList[i]['date'] + ' @'
-                + eventList[i]['time'] + '</h3>' 
-                + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
-              );
+          if ( useDateFilter &&
+            (moment(eventFilter['dateFrom']).unix() 
+              <= moment(eventList[i]['date']).unix()) &&
+            (moment(eventList[i]['date']).unix()
+              <= moment(eventFilter['dateTo']).unix()) ) {
+                $("#event-list").append(
+                  '<li>' + '<h3>'
+                  + eventList[i]['date'] + ' @'
+                  + eventList[i]['time'] + '</h3>' 
+                  + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
+                );
           }
         }
       }
