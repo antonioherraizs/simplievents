@@ -14,10 +14,18 @@ $(function() {
      */
     var eventList = Array();
 
+    // Setup some defaults for date pickers; placeholder= and value= didn't work
+    $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
+    $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
+
     /* Filter for event type.
      * Make it available to multiple functions.
      */ 
-    var typeFilter = "all";
+    var eventFilter = {
+      'type' : 'all',
+      'dateFrom' : $('#dateinput_from').val(),
+      'dateTo' : $('#dateinput_to').val(),
+    }
 
     // Customize BlockUI blocking screen
     $.blockUI.defaults.message = '<h3>Please wait...</h3>';
@@ -29,10 +37,6 @@ $(function() {
 
     // Setup BlockUI: block while ajax is happening
     $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
-
-    // Setup some defaults for date pickers; placeholder= and value= didn't work
-    $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
-    $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
 
     $(document).ready(function () {
 
@@ -61,11 +65,17 @@ $(function() {
         getEvents();
       });
       $("#selectmenu").on('change', function() {
-        typeFilter = $("#selectmenu").val();
-        buildEventList(typeFilter); // apply filters
+        eventFilter['type'] = $("#selectmenu").val();
+      });
+      $('#dateinput_from').on('change', function() {
+        eventFilter['dateFrom'] = $('#dateinput_from').val();
+      });
+      $('#dateinput_to').on('change', function() {
+        eventFilter['dateTo'] = $('#dateinput_to').val();
       });
       $('#button-apply-filters').on('click', function() {
-        location.href = '#page-events'; // filters are already set
+        buildEventList(eventFilter); // apply filters
+        location.href = '#page-events';
       });
 
     });
@@ -153,27 +163,45 @@ $(function() {
         });
       });
 
-      console.log("convertTableToList(): eventList.length = " + eventList.length);;
+      console.log("convertTableToList(): " + eventList.length + " events");
     }
 
-    function buildEventList( typeFilter ) {
+    function buildEventList( eventFilter ) {
       
+      /* Build the list of events with the filter passed as a parameter.
+       *
+       * The filter can be for event types or a date range.
+       * A date range may have empty from/to dates: ignore them in that case.
+       * We work with what we have, we will not get older events from here.
+       */
+
       $("#event-list").empty();
+
+      // let's see if we have a date range
+      var useDateFilter = false;
+      if ( moment(eventFilter['dateTo']).isAfter(eventFilter['dateFrom']) ) {
+        useDateFilter = true;
+      }
       
       for(var i = 0; i < eventList.length; i++) {
-        if (eventList[i]['type'] === typeFilter || typeFilter === 'all') {
-          $("#event-list").append(
-            '<li>' + '<h3>' 
-            + eventList[i]['date'] + ' @' 
-            + eventList[i]['time'] + '</h3>' 
-            + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
-          );
+        if (eventList[i]['type'] == eventFilter['type'] || eventFilter['type'] == 'all') {
+          if (useDateFilter && 
+            moment(eventFilter['dateFrom']).unix() 
+            <= moment(eventList[i]['date']).unix()
+            <= moment(eventFilter['dateTo']).unix() ) {
+              $("#event-list").append(
+                '<li>' + '<h3>'
+                + eventList[i]['date'] + ' @'
+                + eventList[i]['time'] + '</h3>' 
+                + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
+              );
+          }
         }
       }
 
-      if ( typeFilter !== 'all' && $("#event-list li").length == 0 ) {
-        $("#event-list").append('<h3>Nothing here :( try with another type</h3>');
-      }
+      if ($("#event-list li").length == 0)
+        if (eventFilter['type'] !== 'all' || useDateFilter)
+          $("#event-list").append('<h3>Nothing here :( try with another filter</h3>');
 
       // Apply jQuery Mobile's CSS rendering, since DOM has already been built
       // http://stackoverflow.com/a/13694211/251509
@@ -204,7 +232,7 @@ $(function() {
             convertTableToList($table);
 
             // build and refresh event list as ListView
-            buildEventList(typeFilter);
+            buildEventList(eventFilter);
 
             // and go to see the list, in case we're not there
             console.log("getEvents(): table loaded");
