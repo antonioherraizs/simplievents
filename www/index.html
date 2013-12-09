@@ -45,11 +45,20 @@
                 Go!
             </a>
         </form>
+        <div class="centered">
+          <div id="text-feedback" data-controltype="textblock">
+            <!-- empty, built by JS -->
+          </div>
+        </div>
     </div>
   </div>
   
   <div data-role="page" data-control-title="Events" id="page-events">
       <div data-theme="b" data-role="header">
+          <a id="button-logout" data-role="button" data-theme="a" href="#page2"
+          data-icon="delete" data-iconpos="left" class="ui-btn-left">
+            Log out
+          </a>
           <a id="button-refresh" data-role="button" data-theme="a" href="#" 
           data-icon="refresh" data-iconpos="left" class="ui-btn-right">
               Refresh

@@ -50,14 +50,12 @@ $(function() {
         console.log("main() got logURL = " + value);
         logURL = value;
         getEvents();
-        //location.href = '#page-events';
       }
 
       // Setup some defaults for date pickers; placeholder= and value= didn't work
       function setDefaultDateFilter() {
         $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
         $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
-        console.log("setDefaultDateFilter(): defaults set");
       }
       setDefaultDateFilter();
 
@@ -67,6 +65,9 @@ $(function() {
       });
       $('#button-refresh').on('click', function() {
         getEvents();
+      });
+      $('#button-logout').on('click', function() {
+        logout();
       });
       $("#selectmenu").on('change', function() {
         eventFilter['type'] = $("#selectmenu").val();
@@ -95,6 +96,7 @@ $(function() {
       $.ajax({
           type: "POST",
           url: "https://simplisafe.com/my-account/login",
+          timeout: 20000,
           cache: false,
           data: {
             name: $('#text-email').val(), 
@@ -108,9 +110,11 @@ $(function() {
           var $response = $(data); // make jQuery object
 
           if ( needToLogin($response) ) {
-            // user/pass wrong
+            $('#text-feedback').html('<p>User/password wrong, please try again</p>');
             console.log("loginAndGet(): user/pass wrong!");
           } else {
+            $('#text-feedback').empty();
+
             var milliseconds = (new Date).getTime();
             logURL = $response.filter("link[rel='canonical']").attr('href')
               + '/utility/tables?_=' + milliseconds + '&&table=event-log-table';
@@ -123,8 +127,25 @@ $(function() {
             getEvents();
           }
         })
-        .fail(function( e ) {
-          console.log( "Error " + e.responseStatus + ": " + e.responseText );
+        .fail(function( jqXHR, textStatus, errorThrown ) {
+          console.log( "Error " + errorThrown + ": " + textStatus );
+        });
+    }
+
+    function logout() {
+      $.ajax({
+          type: "GET",
+          url: "https://simplisafe.com/logout",
+          cache: false,
+      }) 
+        .done(function( data ) {
+          $('#text-feedback').html('<p>Please log in to continue</p>');
+          $('#text-email').val("");
+          $('#text-pass').val("");
+          location.href = "#page-login";
+        })
+        .fail(function( jqXHR, textStatus, errorThrown ) {
+          console.log( "Error " + errorThrown + ": " + textStatus );
         });
     }
 
@@ -217,7 +238,9 @@ $(function() {
 
       if ($("#event-list li").length == 0)
         if (eventFilter['type'] !== 'all' || useDateFilter)
-          $("#event-list").append('<h3>Nothing here :( try with another filter</h3>');
+          $("#event-list")
+            .append("<h3 class='centered'>Nothing here " 
+              + ":( try with another filter</h3>");
 
       // Apply jQuery Mobile's CSS rendering, since DOM has already been built
       // http://stackoverflow.com/a/13694211/251509
@@ -239,8 +262,9 @@ $(function() {
 
           if ( needToLogin($response) ) {
             // send to login page, with a message
-            location.href = "#page-login";
+            $('#text-feedback').html('<p>Please log in to continue</p>');
             console.log("getEvents(): not logged in!");
+            location.href = "#page-login";
           } else {
             var $table = $('<table>'
               + $response.filter('table').html() + '</table>');
