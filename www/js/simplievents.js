@@ -78,7 +78,7 @@ $(function() {
         eventFilter['dateTo'] = $('#dateinput_to').val();
       });
       $('#button-apply-filters').on('click', function() {
-        buildEventList(eventFilter); // apply filters
+        buildEventList(); // apply filters
         location.href = '#page-events';
       });
       $('#button-reset-dates').on('click', function() {
@@ -173,7 +173,7 @@ $(function() {
       console.log("convertTableToList(): " + eventList.length + " events");
     }
 
-    function buildEventList( eventFilter ) {
+    function buildEventList() {
 
       /* Build the list of events with the filter passed as a parameter.
        *
@@ -190,20 +190,28 @@ $(function() {
         useDateFilter = true;
       }
       
+      var appendIt = false;
       for(var i = 0; i < eventList.length; i++) {
         if (eventList[i]['type'] == eventFilter['type'] || eventFilter['type'] == 'all') {
-          if ( useDateFilter &&
-            (moment(eventFilter['dateFrom']).unix() 
-              <= moment(eventList[i]['date']).unix()) &&
-            (moment(eventList[i]['date']).unix()
-              <= moment(eventFilter['dateTo']).unix()) ) {
-                $("#event-list").append(
-                  '<li>' + '<h3>'
-                  + eventList[i]['date'] + ' @'
-                  + eventList[i]['time'] + '</h3>' 
-                  + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
-                );
+          if (useDateFilter) {
+            var from = moment(eventFilter['dateFrom']).unix();
+            var filter = moment(eventList[i]['date']).unix();
+            var to = moment(eventFilter['dateTo']).unix();
+            if (from <= filter && filter <= to)
+              appendIt = true;
           }
+          else {
+            // no date filter and type filter matches
+            appendIt = true;
+          }
+        }
+        if (appendIt == true) {
+          $("#event-list").append(
+            '<li>' + '<h3>'
+            + eventList[i]['date'] + ' @'
+            + eventList[i]['time'] + '</h3>' 
+            + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
+          );
         }
       }
 
@@ -240,7 +248,7 @@ $(function() {
             convertTableToList($table);
 
             // build and refresh event list as ListView
-            buildEventList(eventFilter);
+            buildEventList();
 
             // and go to see the list, in case we're not there
             console.log("getEvents(): table loaded");
