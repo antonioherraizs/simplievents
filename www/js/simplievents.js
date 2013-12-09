@@ -14,10 +14,6 @@ $(function() {
      */
     var eventList = Array();
 
-    // Setup some defaults for date pickers; placeholder= and value= didn't work
-    $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
-    $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
-
     /* Filter for event type.
      * Make it available to multiple functions.
      */ 
@@ -57,6 +53,14 @@ $(function() {
         //location.href = '#page-events';
       }
 
+      // Setup some defaults for date pickers; placeholder= and value= didn't work
+      function setDefaultDateFilter() {
+        $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
+        $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
+        console.log("setDefaultDateFilter(): defaults set");
+      }
+      setDefaultDateFilter();
+
       // Actions on events for all pages
       $('#button-submit').on('click', function() {
         loginAndGet();
@@ -76,6 +80,9 @@ $(function() {
       $('#button-apply-filters').on('click', function() {
         buildEventList(eventFilter); // apply filters
         location.href = '#page-events';
+      });
+      $('#button-reset-dates').on('click', function() {
+        setDefaultDateFilter();
       });
 
     });
