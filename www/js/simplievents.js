@@ -23,6 +23,7 @@ $(function() {
 
     /* URL to get data once logged in.
      * Will keep in LocalStorage.
+     */
       
     var logURL = "";
 
@@ -34,6 +35,13 @@ $(function() {
      * not Object() to initialize it.
      */
     var eventList = Array();
+
+    // Setup some defaults for date pickers; placeholder= isn't supported for dates
+    function setDefaultDateFilter() {
+      $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
+      $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
+    }
+    setDefaultDateFilter();
 
     /* Filter for event type.
      * Make it available to multiple functions.
@@ -73,13 +81,6 @@ $(function() {
         getEvents();
       }
 
-      // Setup some defaults for date pickers; placeholder= and value= didn't work
-      function setDefaultDateFilter() {
-        $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
-        $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
-      }
-      setDefaultDateFilter();
-
       // Actions on events for all pages
       $('#button-submit').on('click', function() {
         loginAndGet();
@@ -105,6 +106,8 @@ $(function() {
       });
       $('#button-reset-dates').on('click', function() {
         setDefaultDateFilter();
+        eventFilter['dateFrom'] = $('#dateinput_from').val();
+        eventFilter['dateTo'] = $('#dateinput_to').val();
       });
 
     });
@@ -228,7 +231,8 @@ $(function() {
 
       // let's see if we have a date range
       var useDateFilter = false;
-      if ( moment(eventFilter['dateTo']).isAfter(eventFilter['dateFrom']) ) {
+      if ( moment(eventFilter['dateTo']).isAfter(eventFilter['dateFrom']) ||
+           moment(eventFilter['dateTo']).isSame(eventFilter['dateFrom']) ) {
         useDateFilter = true;
       }
       
@@ -239,11 +243,12 @@ $(function() {
             var from = moment(eventFilter['dateFrom']).unix();
             var filter = moment(eventList[i]['date']).unix();
             var to = moment(eventFilter['dateTo']).unix();
-            if (from <= filter && filter <= to)
+            if (from <= filter && filter <= to) {
               appendIt = true;
+            }
           }
           else {
-            // no date filter and type filter matches
+            // no date filter in use and type filter matches
             appendIt = true;
           }
         }
@@ -254,14 +259,16 @@ $(function() {
             + eventList[i]['time'] + '</h3>' 
             + '<p>' + eventList[i]['event'] + '</p>' + '</li>'
           );
+          appendIt = false;
         }
       }
 
-      if ($("#event-list li").length == 0)
+      if ($("#event-list li").length == 0) {
         if (eventFilter['type'] !== 'all' || useDateFilter)
           $("#event-list")
             .append("<h3 class='centered'>Nothing here " 
               + ":( try with another filter</h3>");
+      }
 
       // Apply jQuery Mobile's CSS rendering, since DOM has already been built
       // http://stackoverflow.com/a/13694211/251509
