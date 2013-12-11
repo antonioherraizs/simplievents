@@ -5,7 +5,7 @@ Built with [Codiqa.com](http://www.codiqa.com) + PhoneGap 3.1.0.
 
 Uses some cool libraries and plugins, check out the [js](www/js) directory.
 
-## How to build for Android:
+## How to build for Android
 
 1. Clone repo
 ```sh
@@ -29,7 +29,7 @@ $ git clean -fd
 $ phonegap local run android
 ```
 
-## How to build for iOS:
+## How to build for iOS
 I haven't tried.
 
 ## TOFIX
@@ -41,5 +41,6 @@ I haven't tried.
 ## TODO
 - Rename labels with more user-friendly names
 - Add features:
+  - pull events from all pages or until a max is reached
   - export as HTML/PDF/CSV
   - Notifications
