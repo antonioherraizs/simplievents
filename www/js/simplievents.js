@@ -294,8 +294,10 @@ $(function() {
             console.log("getEvents(): not logged in!");
             location.href = "#page-login";
           } else {
+            // get <table> with event list
             var $table = $('<table>'
               + $response.filter('table').html() + '</table>');
+
             // from <table> to Array()
             convertTableToList($table);
 
