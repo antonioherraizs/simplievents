@@ -268,6 +268,8 @@ $(function() {
           $("#event-list")
             .append("<h3 class='centered'>Nothing here " 
               + ":( try with another filter</h3>");
+      } else {
+        // add 'Load More' <li> button
       }
 
       // Apply jQuery Mobile's CSS rendering, since DOM has already been built
@@ -297,6 +299,10 @@ $(function() {
             // get <table> with event list
             var $table = $('<table>'
               + $response.filter('table').html() + '</table>');
+
+            // get link to last page, so we know how many 'Load More' we can show
+            var howManyMore = $response.find("li.last a").attr('href');
+            howManyMore = $.url(howManyMore).param("page");
 
             // from <table> to Array()
             convertTableToList($table);
