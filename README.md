@@ -41,6 +41,6 @@ I haven't tried.
 ## TODO
 - Rename labels with more user-friendly names
 - Add features:
-  - pull events from all pages or until a max is reached
+  - ~~pull events from all pages or until a max is reached~~
   - export as HTML/PDF/CSV
   - Notifications
