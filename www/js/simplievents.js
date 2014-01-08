@@ -24,8 +24,8 @@ $(function() {
     /* URL to get data once logged in.
      * Will keep in LocalStorage.
      */
-      
     var logURL = "";
+    var baseURL = "";
 
     /* The list of events.
      * 
@@ -36,9 +36,15 @@ $(function() {
      */
     var eventList = Array();
 
+    /* Max number of pages to display when clicking 'Load More'
+     * And page number we're currently at
+     */
+    var howManyEventPages = 1;
+    var eventPage = 1;
+
     // Setup some defaults for date pickers; placeholder= isn't supported for dates
     function setDefaultDateFilter() {
-      $('#dateinput_from').val( moment().subtract('days', 7).format('YYYY-MM-DD') );
+      $('#dateinput_from').val( moment().subtract('days', 30).format('YYYY-MM-DD') );
       $('#dateinput_to').val( moment().format('YYYY-MM-DD') );
     }
     setDefaultDateFilter();
@@ -73,11 +79,13 @@ $(function() {
        * 1. logURL is good and we're logged in ==> get updated table
        * 2. logURL old or not logged in ==> sent to login screen
        */
-      console.log("main(): trying to get logURL from LocalStorage");
+      console.log("main(): trying to get vars from LocalStorage");
       var value = window.localStorage.getItem("logURL");
       if (value !== null && value !== "") {
         console.log("main() got logURL = " + value);
         logURL = value;
+        // load baseURL now too, both
+        baseURL = window.localStorage.getItem("baseURL");
         getEvents();
       }
 
@@ -140,10 +148,11 @@ $(function() {
             $('#text-feedback').empty();
 
             var milliseconds = (new Date).getTime();
-            logURL = $response.filter("link[rel='canonical']").attr('href')
-              + '/utility/tables?_=' + milliseconds + '&&table=event-log-table';
+            baseURL = $response.filter("link[rel='canonical']").attr('href');
+            logURL = baseURL +'/utility/tables?_=' + milliseconds + '&&table=event-log-table';
 
             window.localStorage.setItem("logURL", logURL);
+            window.localStorage.setItem("baseURL", baseURL);
             console.log("login(): logged in and URL stored");
 
             // Call it here to prevent it from beng fired before we are logged in
@@ -199,13 +208,14 @@ $(function() {
       return ret;
     }
 
-    function convertTableToList( $jQueryTable ) {
+    function convertTableToList( $jQueryTable, emptyFirst ) {
 
       // jQuery filter() – search through all the elements.
       // jQuery find() – search through all the child elements only.
       // for each row, get [date, time, event] and store in Array
       // this performs in cuadratic time
-      eventList = []; // empty it first
+      if (emptyFirst)
+        eventList = []; // empty it first
       $jQueryTable.find('tr[class]').each( function() {
         eventList.push({
           'date' : this.cells[0].innerText,
@@ -220,7 +230,7 @@ $(function() {
 
     function buildEventList() {
 
-      /* Build the list of events with the filter passed as a parameter.
+      /* Build the list of events with the filter globally set.
        *
        * The filter can be for event types or a date range.
        * A date range may have empty from/to dates: ignore them in that case.
@@ -269,7 +279,12 @@ $(function() {
             .append("<h3 class='centered'>Nothing here " 
               + ":( try with another filter</h3>");
       } else {
-        // add 'Load More' <li> button
+        // add 'Load More' <li> button until we have pages left
+        if (eventPage < howManyEventPages) {
+          $("#event-list")
+            .append("<li id='button-load-more'><a href='#'>Load More</a></li>");
+          $('#button-load-more').on('click', function() { getMoreEvents(); });
+        }
       }
 
       // Apply jQuery Mobile's CSS rendering, since DOM has already been built
@@ -301,11 +316,11 @@ $(function() {
               + $response.filter('table').html() + '</table>');
 
             // get link to last page, so we know how many 'Load More' we can show
-            var howManyMore = $response.find("li.last a").attr('href');
-            howManyMore = $.url(howManyMore).param("page");
+            var navigationLink = $response.find("li.last a").attr('href');
+            howManyEventPages = $.url(navigationLink).param("page");
 
             // from <table> to Array()
-            convertTableToList($table);
+            convertTableToList($table, true);
 
             // build and refresh event list as ListView
             buildEventList();
@@ -314,6 +329,37 @@ $(function() {
             console.log("getEvents(): table loaded");
             location.href = "#page-events";
           }
+        })
+        .fail(function( e ) {
+          console.log( "Error " + e.responseStatus + ": " + e.responseText );
+        });
+    }
+
+    function getMoreEvents() {
+      // build URL
+      eventPage += 1;
+      var milliseconds = (new Date).getTime();
+      moreURL = baseURL +'/utility/tables?page=' + eventPage 
+        + '&_=' + milliseconds + '&&table=event-log-table';
+
+      $.ajax({
+          type: "GET",
+          url: moreURL,
+          cache: false,
+      })
+        .done(function( data ) {
+
+          var $response = $(data);
+
+          // get <table> with event list
+          var $table = $('<table>'
+            + $response.filter('table').html() + '</table>');
+
+          // from <table> to Array()
+          convertTableToList($table, false);
+          
+          // build and refresh event list as ListView
+          buildEventList();
         })
         .fail(function( e ) {
           console.log( "Error " + e.responseStatus + ": " + e.responseText );
