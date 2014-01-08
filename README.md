@@ -5,6 +5,12 @@ Built with [Codiqa.com](http://www.codiqa.com) + PhoneGap 3.1.0.
 
 Uses some cool libraries and plugins, check out the [js](www/js) directory.
 
+## How to Fork
+
+This repo implements the concept of login into a site, retrieving data from a `<table>` and displaying it as a ListView in a PhoneGap app. Therefore it can be adapted to any other similar use case with little effort. Most of the customizations can be removed without affecting the main app behavior.
+
+It's not using any custom icons or graphics so in order to convert it into another app the files to modify are `www/index.html` and `js/simplievents.js` plus some other minor changes here and there to change the name of the app, etc.
+
 ## How to build for Android
 
 1. Clone repo
